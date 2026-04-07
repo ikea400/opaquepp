@@ -1,6 +1,6 @@
 # opaquepp
 
-A C++ wrapper around the [opaque-ke](https://github.com/facebook/opaque-ke) Rust crate, providing a clean object-oriented interface for the [OPAQUE](https://eprint.iacr.org/2018/163) password-authenticated key exchange (PAKE) protocol.
+A C++ wrapper around the [opaque-ke](https://github.com/facebook/opaque-ke) Rust crate, providing a clean object-oriented interface for the [OPAQUE](https://datatracker.ietf.org/doc/rfc9807/) password-authenticated key exchange (PAKE) protocol.
 
 OPAQUE allows a client to authenticate to a server using a password without ever exposing that password to the server — not during registration, not during login, and not even if the server is compromised.
 
