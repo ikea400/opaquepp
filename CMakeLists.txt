@@ -49,6 +49,9 @@ add_library(opaquepp STATIC
   src/opaque++.cpp
 )
 
+# Inclure les headers de la bibliothèque
+target_include_directories(opaquepp PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
+
 # Propager includes/options fournis par la crate Rust
 target_include_directories(opaquepp
   PUBLIC
