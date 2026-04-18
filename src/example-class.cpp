@@ -27,16 +27,23 @@ static auto accountRegistration(const OpaqueServerSetupPtr& serverSetup,
   OpaqueServer server(serverSetup, clientIdentifier, serverIdentifier, "");
 
   const auto registrationRequest = client.startRegistration();
+  std::cout << registrationRequest.size()
+            << " bytes de demande d'enregistrement generer par le client\n";
 
   // Client sends registrationRequest to server
 
   const auto registrationResponse =
       server.startRegistration(registrationRequest);
+  std::cout << registrationResponse.size()
+            << " bytes de reponse d'enregistrement generer par le serveur\n";
 
   // Server sends registrationResponse to client
 
   const auto registrationRecord =
       client.finishRegistration(registrationResponse);
+
+  std::cout << registrationRecord.size()
+            << " bytes de record d'enregistrement generer par le client\n";
 
   return registrationRecord;
 }

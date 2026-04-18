@@ -1,0 +1,24 @@
+[package]
+name = "opaque_rust"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+crate-type = ["staticlib"]
+
+[profile.release]
+lto = true
+
+[features]
+default = ["fast_argon2"]
+
+fast_argon2 = ["dep:argon2-kdf"]
+
+[dependencies]
+argon2 = { version = "0.5", optional = true }
+argon2-kdf = { version = "1.6", optional = true }
+cxx = { version = "1.0" }
+opaque-ke = { version = "4.0.1", features = ["argon2"] }
+sha2 = { version = "0.10", default-features = false }
+getrandom = "0.3"
+rand = { version = "0.8" }
