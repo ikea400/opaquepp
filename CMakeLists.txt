@@ -39,7 +39,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(Corrosion)
 
 # Import de la crate rust
-corrosion_import_crate(MANIFEST_PATH ${CMAKE_SOURCE_DIR}/opaque_rust/Cargo.toml)
+corrosion_import_crate(MANIFEST_PATH ${CMAKE_CURRENT_SOURCE_DIR}/opaque_rust/Cargo.toml)
 
 enable_testing()
 
