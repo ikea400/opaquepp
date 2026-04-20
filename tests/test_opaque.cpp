@@ -53,6 +53,9 @@ TEST_F(OpaqueProtocolTest, FullHandshakeSuccess) {
   auto password_file = server->finishRegistration(registration_record);
   ASSERT_EQ(password_file.size(), kPasswordFileSize);
 
+  const auto export_key = client->getExportKey();
+  ASSERT_EQ(export_key.size(), kExportKeySize);
+
   // --- 2. LOGIN PHASE ---
   // Note: In a real app, the server would have saved 'registration_record' in a
   // DB
@@ -81,8 +84,16 @@ TEST_F(OpaqueProtocolTest, FullHandshakeSuccess) {
   std::span<const uint8_t> server_key = login_server->getSessionKey();
 
   EXPECT_FALSE(client_key.empty());
-  EXPECT_EQ(client_key.size(), server_key.size())
-      << "Session key lengths do not match!";
+  EXPECT_EQ(client_key.size(), kSessionKeySize)
+      << "Client session key has incorrect length!";
+  EXPECT_EQ(server_key.size(), kSessionKeySize)
+      << "Server session key has incorrect length!";
+
+  auto login_export_key = login_client->getExportKey();
+  ASSERT_EQ(login_export_key.size(), kExportKeySize);
+
+  EXPECT_TRUE(std::equal(login_export_key.begin(), login_export_key.end(),
+                         export_key.begin()));
 
   EXPECT_TRUE(
       std::equal(client_key.begin(), client_key.end(), server_key.begin()))

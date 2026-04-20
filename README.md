@@ -48,6 +48,8 @@ The library exposes three main classes: `OpaqueServerSetup`, `OpaqueServer`, and
 ```cpp
 #include "opaque++.h"
 
+using namespace opaque;
+
 // One-time server setup — persist this across sessions
 auto serverSetup = std::make_shared<OpaqueServerSetup>();
 
@@ -67,7 +69,10 @@ const auto registrationResponse = server.startRegistration(registrationRequest);
 // Step 3: client finalizes and produces a registration record
 const auto registrationRecord = client.finishRegistration(registrationResponse);
 
-// Store registrationRecord server-side, associated with clientIdentifier
+// Step 3: server validate the registration record and produces a password file
+const auto passwordFile = server.finishRegistration(registrationRecord);
+
+// Store passwordFile server-side, associated with clientIdentifier
 ```
 
 ### Login
@@ -81,8 +86,8 @@ OpaqueServer server(serverSetup, clientIdentifier, serverIdentifier, context);
 // Step 1: client initiates login
 const auto loginRequest = client.startLogin();
 
-// Step 2: server responds (requires the stored registration record)
-const auto loginResponse = server.startLogin(clientIdentifier, registrationRecord, loginRequest);
+// Step 2: server responds (requires the stored password file)
+const auto loginResponse = server.startLogin(clientIdentifier, passwordFile, loginRequest);
 
 // Step 3: client finalizes login
 const auto finishLoginRequest = client.finishLogin(loginResponse);

@@ -143,6 +143,7 @@ std::vector<uint8_t> OpaqueClient::finishRegistration(
               .variant = KeyStretchingFunctionVariant::RfcServerAuthentication,
           }});
 
+  m_exportKey.assign(response.export_key.begin(), response.export_key.end());
   m_serverStaticPublicKey.assign(response.server_static_public_key.begin(),
                                  response.server_static_public_key.end());
 
