@@ -87,6 +87,10 @@ target_link_libraries(example_class PRIVATE opaquepp)
 add_executable(example_rust src/example-rust.cpp)
 target_link_libraries(example_rust PRIVATE opaquepp)
 
+# --- Utils ----------------------------------------------------------------
+add_executable(setup-generator src/setup-generator.cpp)
+target_link_libraries(setup-generator PRIVATE opaquepp)
+
 # --- Tests ---------------------------------------------------------------
 add_subdirectory(tests)
 
