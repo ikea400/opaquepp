@@ -235,6 +235,7 @@ mod opaque_ffi {
     }
 
     struct OpaqueFinishClientLoginResult {
+        ok: bool,
         finish_login_request: Vec<u8>,
         session_key: Vec<u8>,
         export_key: Vec<u8>,
@@ -293,7 +294,7 @@ mod opaque_ffi {
 
         fn opaque_finish_client_login(
             params: OpaqueFinishClientLoginParams,
-        ) -> Result<UniquePtr<OpaqueFinishClientLoginResult>>;
+        ) -> Result<OpaqueFinishClientLoginResult>;
 
         fn opaque_create_server_setup() -> Vec<u8>;
 
@@ -537,7 +538,7 @@ fn opaque_start_client_login(
 
 fn opaque_finish_client_login(
     params: OpaqueFinishClientLoginParams,
-) -> Result<cxx::UniquePtr<OpaqueFinishClientLoginResult>, Error> {
+) -> Result<OpaqueFinishClientLoginResult, Error> {
     let mut client_rng = OsRng;
     let credential_response_bytes = params.login_response;
     let state = ClientLogin::<DefaultCipherSuite>::deserialize(params.client_login_state)
@@ -568,16 +569,23 @@ fn opaque_finish_client_login(
 
     if result.is_err() {
         // Client-detected login failure
-        return Ok(cxx::UniquePtr::null());
+        return Ok(OpaqueFinishClientLoginResult {
+            finish_login_request: Vec::new(),
+            session_key: Vec::new(),
+            export_key: Vec::new(),
+            server_static_public_key: Vec::new(),
+            ok: false,
+        });
     }
     let client_login_finish_result = result.unwrap();
 
     let result = OpaqueFinishClientLoginResult {
+        ok: true,
         finish_login_request: client_login_finish_result.message.serialize().to_vec(),
         session_key: client_login_finish_result.session_key.to_vec(),
         export_key: client_login_finish_result.export_key.to_vec(),
         server_static_public_key: client_login_finish_result.server_s_pk.serialize().to_vec(),
     };
 
-    Ok(cxx::UniquePtr::new(result))
+    Ok(result)
 }

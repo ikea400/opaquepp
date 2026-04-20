@@ -6,7 +6,6 @@
 #include <exception>
 #include <initializer_list>
 #include <iterator>
-#include <memory>
 #include <new>
 #include <stdexcept>
 #include <string>
@@ -17,8 +16,6 @@
 #endif
 
 #ifdef __GNUC__
-#pragma GCC diagnostic ignored "-Wmismatched-new-delete"
-#pragma GCC diagnostic ignored "-Wmissing-declarations"
 #pragma GCC diagnostic ignored "-Wshadow"
 #ifdef __clang__
 #pragma clang diagnostic ignored "-Wdollar-in-identifier-extension"
@@ -811,13 +808,6 @@ public:
     return error;
   }
 };
-
-template <bool> struct deleter_if {
-  template <typename T> void operator()(T *) {}
-};
-template <> struct deleter_if<true> {
-  template <typename T> void operator()(T *ptr) { ptr->~T(); }
-};
 } // namespace
 } // namespace cxxbridge1
 } // namespace rust
@@ -949,6 +939,7 @@ struct OpaqueFinishClientLoginParams final {
 #ifndef CXXBRIDGE1_STRUCT_OpaqueFinishClientLoginResult
 #define CXXBRIDGE1_STRUCT_OpaqueFinishClientLoginResult
 struct OpaqueFinishClientLoginResult final {
+  bool ok CXX_DEFAULT_VALUE(false);
   ::rust::Vec<::std::uint8_t> finish_login_request;
   ::rust::Vec<::std::uint8_t> session_key;
   ::rust::Vec<::std::uint8_t> export_key;
@@ -1032,7 +1023,7 @@ extern "C" {
 
 ::rust::repr::PtrLen cxxbridge1$194$opaque_start_client_login(::OpaqueStartClientLoginParams *params, ::OpaqueStartClientLoginResult *return$) noexcept;
 
-::rust::repr::PtrLen cxxbridge1$194$opaque_finish_client_login(::OpaqueFinishClientLoginParams *params, ::std::unique_ptr<::OpaqueFinishClientLoginResult> *return$) noexcept;
+::rust::repr::PtrLen cxxbridge1$194$opaque_finish_client_login(::OpaqueFinishClientLoginParams *params, ::OpaqueFinishClientLoginResult *return$) noexcept;
 
 void cxxbridge1$194$opaque_create_server_setup(::rust::Vec<::std::uint8_t> *return$) noexcept;
 
@@ -1075,9 +1066,9 @@ void cxxbridge1$194$opaque_create_server_setup(::rust::Vec<::std::uint8_t> *retu
   return ::std::move(return$.value);
 }
 
-::std::unique_ptr<::OpaqueFinishClientLoginResult> opaque_finish_client_login(::OpaqueFinishClientLoginParams params) {
+::OpaqueFinishClientLoginResult opaque_finish_client_login(::OpaqueFinishClientLoginParams params) {
   ::rust::ManuallyDrop<::OpaqueFinishClientLoginParams> params$(::std::move(params));
-  ::rust::MaybeUninit<::std::unique_ptr<::OpaqueFinishClientLoginResult>> return$;
+  ::rust::MaybeUninit<::OpaqueFinishClientLoginResult> return$;
   ::rust::repr::PtrLen error$ = cxxbridge1$194$opaque_finish_client_login(&params$.value, &return$.value);
   if (error$.ptr) {
     throw ::rust::impl<::rust::Error>::error(error$);
@@ -1129,29 +1120,3 @@ void cxxbridge1$194$opaque_create_server_setup(::rust::Vec<::std::uint8_t> *retu
   }
   return ::std::move(return$.value);
 }
-
-extern "C" {
-static_assert(::rust::detail::is_complete<::std::remove_extent<::OpaqueFinishClientLoginResult>::type>::value, "definition of `::OpaqueFinishClientLoginResult` is required");
-static_assert(sizeof(::std::unique_ptr<::OpaqueFinishClientLoginResult>) == sizeof(void *), "");
-static_assert(alignof(::std::unique_ptr<::OpaqueFinishClientLoginResult>) == alignof(void *), "");
-void cxxbridge1$unique_ptr$OpaqueFinishClientLoginResult$null(::std::unique_ptr<::OpaqueFinishClientLoginResult> *ptr) noexcept {
-  ::new (ptr) ::std::unique_ptr<::OpaqueFinishClientLoginResult>();
-}
-::OpaqueFinishClientLoginResult *cxxbridge1$unique_ptr$OpaqueFinishClientLoginResult$uninit(::std::unique_ptr<::OpaqueFinishClientLoginResult> *ptr) noexcept {
-  ::OpaqueFinishClientLoginResult *uninit = reinterpret_cast<::OpaqueFinishClientLoginResult *>(new ::rust::MaybeUninit<::OpaqueFinishClientLoginResult>);
-  ::new (ptr) ::std::unique_ptr<::OpaqueFinishClientLoginResult>(uninit);
-  return uninit;
-}
-void cxxbridge1$unique_ptr$OpaqueFinishClientLoginResult$raw(::std::unique_ptr<::OpaqueFinishClientLoginResult> *ptr, ::std::unique_ptr<::OpaqueFinishClientLoginResult>::pointer raw) noexcept {
-  ::new (ptr) ::std::unique_ptr<::OpaqueFinishClientLoginResult>(raw);
-}
-::std::unique_ptr<::OpaqueFinishClientLoginResult>::element_type const *cxxbridge1$unique_ptr$OpaqueFinishClientLoginResult$get(::std::unique_ptr<::OpaqueFinishClientLoginResult> const &ptr) noexcept {
-  return ptr.get();
-}
-::std::unique_ptr<::OpaqueFinishClientLoginResult>::pointer cxxbridge1$unique_ptr$OpaqueFinishClientLoginResult$release(::std::unique_ptr<::OpaqueFinishClientLoginResult> &ptr) noexcept {
-  return ptr.release();
-}
-void cxxbridge1$unique_ptr$OpaqueFinishClientLoginResult$drop(::std::unique_ptr<::OpaqueFinishClientLoginResult> *ptr) noexcept {
-  ::rust::deleter_if<::rust::detail::is_complete<::OpaqueFinishClientLoginResult>::value>{}(ptr);
-}
-} // extern "C"

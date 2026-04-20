@@ -104,7 +104,7 @@ static auto account_login(
               .variant = KeyStretchingFunctionVariant::RfcServerAuthentication,
           }});
 
-  if (!finish_client_login) {
+  if (!finish_client_login.ok) {
     throw std::runtime_error("Login failed");
   }
 
@@ -115,13 +115,13 @@ static auto account_login(
           .server_login_state = {start_server_login.server_login_state.data(),
                                  start_server_login.server_login_state.size()},
           .finish_login_request =
-              {finish_client_login->finish_login_request.data(),
-               finish_client_login->finish_login_request.size()},
+              {finish_client_login.finish_login_request.data(),
+               finish_client_login.finish_login_request.size()},
           .context = "",
           .client_identifier = client_identifier,
           .server_identifier = server_identifier});
 
-  return std::make_pair(finish_client_login->session_key,
+  return std::make_pair(finish_client_login.session_key,
                         finish_server_login.session_key);
 }
 

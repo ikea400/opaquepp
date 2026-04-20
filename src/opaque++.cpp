@@ -166,18 +166,18 @@ std::vector<uint8_t> OpaqueClient::finishLogin(
               .variant = KeyStretchingFunctionVariant::RfcServerAuthentication,
           }});
 
-  if (!response) {
+  if (!response.ok) {
     throw InvalidLoginException();
   }
 
-  m_exportKey.assign(response->export_key.begin(), response->export_key.end());
-  m_sessionKey.assign(response->session_key.begin(),
-                      response->session_key.end());
-  m_serverStaticPublicKey.assign(response->server_static_public_key.begin(),
-                                 response->server_static_public_key.end());
+  m_exportKey.assign(response.export_key.begin(), response.export_key.end());
+  m_sessionKey.assign(response.session_key.begin(),
+                      response.session_key.end());
+  m_serverStaticPublicKey.assign(response.server_static_public_key.begin(),
+                                 response.server_static_public_key.end());
 
-  std::vector<uint8_t> loginRequest(response->finish_login_request.begin(),
-                                    response->finish_login_request.end());
+  std::vector<uint8_t> loginRequest(response.finish_login_request.begin(),
+                                    response.finish_login_request.end());
 
   return loginRequest;
 }

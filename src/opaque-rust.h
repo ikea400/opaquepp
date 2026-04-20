@@ -6,7 +6,6 @@
 #include <cstdint>
 #include <initializer_list>
 #include <iterator>
-#include <memory>
 #include <new>
 #include <stdexcept>
 #include <string>
@@ -870,6 +869,7 @@ struct OpaqueFinishClientLoginParams final {
 #ifndef CXXBRIDGE1_STRUCT_OpaqueFinishClientLoginResult
 #define CXXBRIDGE1_STRUCT_OpaqueFinishClientLoginResult
 struct OpaqueFinishClientLoginResult final {
+  bool ok CXX_DEFAULT_VALUE(false);
   ::rust::Vec<::std::uint8_t> finish_login_request;
   ::rust::Vec<::std::uint8_t> session_key;
   ::rust::Vec<::std::uint8_t> export_key;
@@ -952,7 +952,7 @@ struct OpaqueFinishServerLoginResult final {
 
 ::OpaqueStartClientLoginResult opaque_start_client_login(::OpaqueStartClientLoginParams params);
 
-::std::unique_ptr<::OpaqueFinishClientLoginResult> opaque_finish_client_login(::OpaqueFinishClientLoginParams params);
+::OpaqueFinishClientLoginResult opaque_finish_client_login(::OpaqueFinishClientLoginParams params);
 
 ::rust::Vec<::std::uint8_t> opaque_create_server_setup() noexcept;
 
