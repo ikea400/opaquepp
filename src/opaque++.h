@@ -7,9 +7,25 @@
 #include <string_view>
 #include <vector>
 
+namespace opaque {
 struct InvalidLoginException : public std::exception {
   const char* what() const noexcept override { return "Login failed"; }
 };
+
+// Registration Phase
+inline static constexpr size_t kRegisterRequestSize = 32;
+inline static constexpr size_t kRegisterResponseSize = 64;
+inline static constexpr size_t kRegisterRecordSize = 192;
+inline static constexpr size_t kPasswordFileSize = 192;
+
+// Login (AKE) Phase
+inline static constexpr size_t kStartLoginRequestSize = 96;
+inline static constexpr size_t kStartLoginResponseSize = 320;
+inline static constexpr size_t kFinishLoginRequestSize = 64;
+
+// Derived Keys
+inline static constexpr size_t kSessionKeySize = 64;
+inline static constexpr size_t kExportKeySize = 64;
 
 class OpaqueServerSetup {
  public:
@@ -53,6 +69,9 @@ class OpaqueServer : public OpaqueCommon {
   std::vector<uint8_t> startRegistration(
       const std::span<const uint8_t> registrationRequest);
 
+  std::vector<uint8_t> finishRegistration(
+      const std::span<const uint8_t> registrationRecord);
+
   std::vector<uint8_t> startLogin(
       const std::string_view identifier,
       const std::span<const uint8_t> registrationRecord,
@@ -90,3 +109,4 @@ class OpaqueClient : public OpaqueCommon {
   std::vector<uint8_t> m_serverStaticPublicKey;
   std::vector<uint8_t> m_exportKey;
 };
+}  // namespace opaque

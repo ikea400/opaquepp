@@ -9,6 +9,8 @@
 
 #include "../src/opaque++.h"
 
+using namespace opaque;
+
 class OpaqueProtocolTest : public ::testing::Test {
  protected:
   // Shared test constants
@@ -38,15 +40,18 @@ TEST_F(OpaqueProtocolTest, FullHandshakeSuccess) {
 
   // Client initiates
   auto reg_request = client->startRegistration();
-  ASSERT_FALSE(reg_request.empty());
+  ASSERT_EQ(reg_request.size(), kRegisterRequestSize);
 
   // Server responds
   auto reg_response = server->startRegistration(reg_request);
-  ASSERT_FALSE(reg_response.empty());
+  ASSERT_EQ(reg_response.size(), kRegisterResponseSize);
 
   // Client finalizes and creates the record for the server to store
   auto registration_record = client->finishRegistration(reg_response);
-  ASSERT_FALSE(registration_record.empty());
+  ASSERT_EQ(registration_record.size(), kRegisterRecordSize);
+
+  auto password_file = server->finishRegistration(registration_record);
+  ASSERT_EQ(password_file.size(), kPasswordFileSize);
 
   // --- 2. LOGIN PHASE ---
   // Note: In a real app, the server would have saved 'registration_record' in a
@@ -61,7 +66,7 @@ TEST_F(OpaqueProtocolTest, FullHandshakeSuccess) {
 
   // Server processes login request
   auto login_response =
-      login_server->startLogin(user_id, registration_record, login_request);
+      login_server->startLogin(user_id, password_file, login_request);
 
   // Client processes server response and generates finish request
   auto finish_request = login_client->finishLogin(login_response);
@@ -97,6 +102,8 @@ TEST_F(OpaqueProtocolTest, LoginFailsWithWrongPassword) {
   auto reg_record = client_reg->finishRegistration(
       server_reg->startRegistration(client_reg->startRegistration()));
 
+  auto password_file = server_reg->finishRegistration(reg_record);
+
   // 2. Try to login with "WRONG_password"
   auto login_client = std::make_unique<OpaqueClient>("WRONG_password", user_id,
                                                      server_id, context);
@@ -105,7 +112,7 @@ TEST_F(OpaqueProtocolTest, LoginFailsWithWrongPassword) {
 
   auto login_request = login_client->startLogin();
   auto login_response =
-      login_server->startLogin(user_id, reg_record, login_request);
+      login_server->startLogin(user_id, password_file, login_request);
 
   // This should trigger your custom InvalidLoginException
   EXPECT_THROW(
@@ -267,7 +274,7 @@ TEST_F(OpaqueProtocolTest,
   auto reg_req_A = clientA->startRegistration();
   auto reg_resp_A = serverA->startRegistration(reg_req_A);
   auto reg_record_A = clientA->finishRegistration(reg_resp_A);
-  ASSERT_FALSE(reg_record_A.empty());
+  ASSERT_EQ(reg_record_A.size(), kRegisterRecordSize);
 
   // Register user B with the same password
   const std::string userB = "bob@example.com";
@@ -279,7 +286,8 @@ TEST_F(OpaqueProtocolTest,
   auto reg_req_B = clientB->startRegistration();
   auto reg_resp_B = serverB->startRegistration(reg_req_B);
   auto reg_record_B = clientB->finishRegistration(reg_resp_B);
-  ASSERT_FALSE(reg_record_B.empty());
+  ASSERT_EQ(reg_record_B.size(), kRegisterRecordSize);
+
   // Ensure records differ (sanity)
   EXPECT_NE(reg_record_A.size(), 0u);
   EXPECT_NE(reg_record_B.size(), 0u);
@@ -321,7 +329,7 @@ TEST_F(OpaqueProtocolTest, LoginFailsWhenClientAndServerIdentifiersSwapped) {
   auto reg_req_A = clientA->startRegistration();
   auto reg_resp_A = serverA->startRegistration(reg_req_A);
   auto reg_record_A = clientA->finishRegistration(reg_resp_A);
-  ASSERT_FALSE(reg_record_A.empty());
+  ASSERT_EQ(reg_record_A.size(), kRegisterRecordSize);
 
   // Register user B
   const std::string userB = "bob@example.com";
@@ -333,7 +341,7 @@ TEST_F(OpaqueProtocolTest, LoginFailsWhenClientAndServerIdentifiersSwapped) {
   auto reg_req_B = clientB->startRegistration();
   auto reg_resp_B = serverB->startRegistration(reg_req_B);
   auto reg_record_B = clientB->finishRegistration(reg_resp_B);
-  ASSERT_FALSE(reg_record_B.empty());
+  ASSERT_EQ(reg_record_B.size(), kRegisterRecordSize);
 
   // Now client A tries to login but the server uses B's identity and record
   // (swapped)
@@ -352,4 +360,29 @@ TEST_F(OpaqueProtocolTest, LoginFailsWhenClientAndServerIdentifiersSwapped) {
   EXPECT_THROW(
       { login_clientA->finishLogin(login_resp_swapped); },
       InvalidLoginException);
+}
+
+/**
+ * @brief Verify that login fails when the registration record sent to the
+ * server is compromised before being stored.
+ */
+TEST_F(OpaqueProtocolTest, LoginFailsWhenRegistrationRecordIsCompromised) {
+  // 1. Register normally
+  auto reg_client =
+      std::make_unique<OpaqueClient>(password, user_id, server_id, context);
+  auto reg_server =
+      std::make_unique<OpaqueServer>(server_setup, user_id, server_id, context);
+
+  auto reg_request = reg_client->startRegistration();
+  auto reg_response = reg_server->startRegistration(reg_request);
+  auto registration_record = reg_client->finishRegistration(reg_response);
+  ASSERT_FALSE(registration_record.empty());
+
+  // 2. Compromise the record before the server stores it
+  auto compromised_record = registration_record;
+  compromised_record[0] ^= 0x01;
+  ASSERT_NE(compromised_record, registration_record);
+
+  EXPECT_THROW(
+      { reg_server->finishRegistration(compromised_record); }, std::exception);
 }

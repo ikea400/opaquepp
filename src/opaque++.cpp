@@ -7,6 +7,8 @@
 #include "opaque++.h"
 #include "opaque-rust.h"
 
+using namespace opaque;
+
 OpaqueServerSetup::OpaqueServerSetup() {
   const auto setup = opaque_create_server_setup();
   m_serverSetup.assign(setup.begin(), setup.end());
@@ -52,6 +54,20 @@ std::vector<uint8_t> OpaqueServer::startRegistration(
       response.registration_response.end());
 
   return registrationResponse;
+}
+
+std::vector<uint8_t> opaque::OpaqueServer::finishRegistration(
+    const std::span<const uint8_t> registrationRecord) {
+  const auto response =
+      opaque_finish_server_registration(OpaqueFinishServerRegistrationParams{
+          .message_bytes = {registrationRecord.data(),
+                            registrationRecord.size()},
+      });
+
+  std::vector<uint8_t> passwordFile(response.password_file.begin(),
+                                    response.password_file.end());
+
+  return passwordFile;
 }
 
 std::vector<uint8_t> OpaqueServer::startLogin(

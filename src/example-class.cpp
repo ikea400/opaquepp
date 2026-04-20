@@ -12,6 +12,8 @@
 
 #include "opaque++.h"
 
+using namespace opaque;
+
 static void print_hex(const std::span<const std::uint8_t> data) {
   for (const auto& byte : data) {
     std::cout << std::hex << static_cast<int>(byte) << " ";
@@ -45,7 +47,15 @@ static auto accountRegistration(const OpaqueServerSetupPtr& serverSetup,
   std::cout << registrationRecord.size()
             << " bytes de record d'enregistrement generer par le client\n";
 
-  return registrationRecord;
+  // Client sends registrationRecord to server
+
+  const auto passwordFile = server.finishRegistration(registrationRecord);
+
+  std::cout
+      << passwordFile.size()
+      << " bytes de password file d'enregistrement generer par le serveur\n";
+
+  return passwordFile;
 }
 
 static auto accountLogin(
@@ -57,21 +67,33 @@ static auto accountLogin(
   OpaqueServer server(serverSetup, clientIdentifier, serverIdentifier, context);
 
   const auto loginRequest = client.startLogin();
+  std::cout << loginRequest.size()
+            << " bytes de demande de login generer par le client\n";
 
   // Client sends loginRequest to server
 
   const auto loginResponse =
       server.startLogin(clientIdentifier, registration_record, loginRequest);
+  std::cout << loginResponse.size()
+            << " bytes de reponse de login generer par le serveur\n";
 
   // Server sends loginResponse to client
 
   const auto finishLoginRequest = client.finishLogin(loginResponse);
+  std::cout
+      << finishLoginRequest.size()
+      << " bytes de demande de finalisation de login generer par le client\n";
 
   // Client sends finishLoginRequest to server
 
   server.finishLogin(finishLoginRequest);
 
   // Client and server should now have the same session key
+
+  std::cout << client.getSessionKey().size()
+            << " bytes de session key generer par le client/serveur\n";
+  std::cout << client.getExportKey().size()
+            << " bytes de export key generer par le client\n";
 
   return std::make_pair(client.getSessionKey(), server.getSessionKey());
 }

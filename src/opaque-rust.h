@@ -761,6 +761,8 @@ struct OpaqueFinishClientLoginParams;
 struct OpaqueFinishClientLoginResult;
 struct OpaqueCreateServerRegistrationResponseParams;
 struct OpaqueCreateServerRegistrationResponseResult;
+struct OpaqueFinishServerRegistrationParams;
+struct OpaqueFinishServerRegistrationResult;
 struct OpaqueStartServerLoginParams;
 struct OpaqueStartServerLoginResult;
 struct OpaqueFinishServerLoginParams;
@@ -899,6 +901,24 @@ struct OpaqueCreateServerRegistrationResponseResult final {
 };
 #endif // CXXBRIDGE1_STRUCT_OpaqueCreateServerRegistrationResponseResult
 
+#ifndef CXXBRIDGE1_STRUCT_OpaqueFinishServerRegistrationParams
+#define CXXBRIDGE1_STRUCT_OpaqueFinishServerRegistrationParams
+struct OpaqueFinishServerRegistrationParams final {
+  ::rust::Slice<::std::uint8_t const> message_bytes;
+
+  using IsRelocatable = ::std::true_type;
+};
+#endif // CXXBRIDGE1_STRUCT_OpaqueFinishServerRegistrationParams
+
+#ifndef CXXBRIDGE1_STRUCT_OpaqueFinishServerRegistrationResult
+#define CXXBRIDGE1_STRUCT_OpaqueFinishServerRegistrationResult
+struct OpaqueFinishServerRegistrationResult final {
+  ::rust::Vec<::std::uint8_t> password_file;
+
+  using IsRelocatable = ::std::true_type;
+};
+#endif // CXXBRIDGE1_STRUCT_OpaqueFinishServerRegistrationResult
+
 #ifndef CXXBRIDGE1_STRUCT_OpaqueStartServerLoginParams
 #define CXXBRIDGE1_STRUCT_OpaqueStartServerLoginParams
 struct OpaqueStartServerLoginParams final {
@@ -959,6 +979,8 @@ struct OpaqueFinishServerLoginResult final {
 ::rust::Vec<::std::uint8_t> opaque_get_server_public_key(::rust::Slice<::std::uint8_t const> data);
 
 ::OpaqueCreateServerRegistrationResponseResult opaque_create_server_registration_response(::OpaqueCreateServerRegistrationResponseParams params);
+
+::OpaqueFinishServerRegistrationResult opaque_finish_server_registration(::OpaqueFinishServerRegistrationParams params);
 
 ::OpaqueStartServerLoginResult opaque_start_server_login(::OpaqueStartServerLoginParams params);
 

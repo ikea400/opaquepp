@@ -840,6 +840,8 @@ struct OpaqueFinishClientLoginParams;
 struct OpaqueFinishClientLoginResult;
 struct OpaqueCreateServerRegistrationResponseParams;
 struct OpaqueCreateServerRegistrationResponseResult;
+struct OpaqueFinishServerRegistrationParams;
+struct OpaqueFinishServerRegistrationResult;
 struct OpaqueStartServerLoginParams;
 struct OpaqueStartServerLoginResult;
 struct OpaqueFinishServerLoginParams;
@@ -978,6 +980,24 @@ struct OpaqueCreateServerRegistrationResponseResult final {
 };
 #endif // CXXBRIDGE1_STRUCT_OpaqueCreateServerRegistrationResponseResult
 
+#ifndef CXXBRIDGE1_STRUCT_OpaqueFinishServerRegistrationParams
+#define CXXBRIDGE1_STRUCT_OpaqueFinishServerRegistrationParams
+struct OpaqueFinishServerRegistrationParams final {
+  ::rust::Slice<::std::uint8_t const> message_bytes;
+
+  using IsRelocatable = ::std::true_type;
+};
+#endif // CXXBRIDGE1_STRUCT_OpaqueFinishServerRegistrationParams
+
+#ifndef CXXBRIDGE1_STRUCT_OpaqueFinishServerRegistrationResult
+#define CXXBRIDGE1_STRUCT_OpaqueFinishServerRegistrationResult
+struct OpaqueFinishServerRegistrationResult final {
+  ::rust::Vec<::std::uint8_t> password_file;
+
+  using IsRelocatable = ::std::true_type;
+};
+#endif // CXXBRIDGE1_STRUCT_OpaqueFinishServerRegistrationResult
+
 #ifndef CXXBRIDGE1_STRUCT_OpaqueStartServerLoginParams
 #define CXXBRIDGE1_STRUCT_OpaqueStartServerLoginParams
 struct OpaqueStartServerLoginParams final {
@@ -1039,6 +1059,8 @@ void cxxbridge1$194$opaque_create_server_setup(::rust::Vec<::std::uint8_t> *retu
 ::rust::repr::PtrLen cxxbridge1$194$opaque_get_server_public_key(::rust::Slice<::std::uint8_t const> data, ::rust::Vec<::std::uint8_t> *return$) noexcept;
 
 ::rust::repr::PtrLen cxxbridge1$194$opaque_create_server_registration_response(::OpaqueCreateServerRegistrationResponseParams *params, ::OpaqueCreateServerRegistrationResponseResult *return$) noexcept;
+
+::rust::repr::PtrLen cxxbridge1$194$opaque_finish_server_registration(::OpaqueFinishServerRegistrationParams *params, ::OpaqueFinishServerRegistrationResult *return$) noexcept;
 
 ::rust::repr::PtrLen cxxbridge1$194$opaque_start_server_login(::OpaqueStartServerLoginParams *params, ::OpaqueStartServerLoginResult *return$) noexcept;
 
@@ -1104,6 +1126,16 @@ void cxxbridge1$194$opaque_create_server_setup(::rust::Vec<::std::uint8_t> *retu
   ::rust::ManuallyDrop<::OpaqueCreateServerRegistrationResponseParams> params$(::std::move(params));
   ::rust::MaybeUninit<::OpaqueCreateServerRegistrationResponseResult> return$;
   ::rust::repr::PtrLen error$ = cxxbridge1$194$opaque_create_server_registration_response(&params$.value, &return$.value);
+  if (error$.ptr) {
+    throw ::rust::impl<::rust::Error>::error(error$);
+  }
+  return ::std::move(return$.value);
+}
+
+::OpaqueFinishServerRegistrationResult opaque_finish_server_registration(::OpaqueFinishServerRegistrationParams params) {
+  ::rust::ManuallyDrop<::OpaqueFinishServerRegistrationParams> params$(::std::move(params));
+  ::rust::MaybeUninit<::OpaqueFinishServerRegistrationResult> return$;
+  ::rust::repr::PtrLen error$ = cxxbridge1$194$opaque_finish_server_registration(&params$.value, &return$.value);
   if (error$.ptr) {
     throw ::rust::impl<::rust::Error>::error(error$);
   }

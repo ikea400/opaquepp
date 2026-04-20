@@ -14,8 +14,8 @@ use opaque_ke::rand::rngs::OsRng;
 use opaque_ke::{
     ClientLogin, ClientLoginFinishParameters, ClientRegistration,
     ClientRegistrationFinishParameters, CredentialFinalization, CredentialRequest,
-    CredentialResponse, Identifiers, RegistrationRequest, RegistrationResponse, ServerLogin,
-    ServerLoginParameters, ServerRegistration, ServerSetup,
+    CredentialResponse, Identifiers, RegistrationRequest, RegistrationResponse, RegistrationUpload,
+    ServerLogin, ServerLoginParameters, ServerRegistration, ServerSetup,
 };
 use opaque_ke::{ciphersuite::CipherSuite, errors::InternalError, errors::ProtocolError};
 
@@ -251,6 +251,14 @@ mod opaque_ffi {
         registration_response: Vec<u8>,
     }
 
+    struct OpaqueFinishServerRegistrationParams<'a> {
+        message_bytes: &'a [u8],
+    }
+
+    struct OpaqueFinishServerRegistrationResult {
+        password_file: Vec<u8>,
+    }
+
     struct OpaqueStartServerLoginParams<'a> {
         server_setup: &'a [u8],
         registration_record: &'a [u8],
@@ -303,6 +311,10 @@ mod opaque_ffi {
             params: OpaqueCreateServerRegistrationResponseParams,
         ) -> Result<OpaqueCreateServerRegistrationResponseResult>;
 
+        fn opaque_finish_server_registration(
+            params: OpaqueFinishServerRegistrationParams,
+        ) -> Result<OpaqueFinishServerRegistrationResult>;
+
         fn opaque_start_server_login(
             params: OpaqueStartServerLoginParams,
         ) -> Result<OpaqueStartServerLoginResult>;
@@ -318,10 +330,11 @@ use opaque_ffi::{
     OpaqueCreateServerRegistrationResponseParams, OpaqueCreateServerRegistrationResponseResult,
     OpaqueFinishClientLoginParams, OpaqueFinishClientLoginResult,
     OpaqueFinishClientRegistrationParams, OpaqueFinishClientRegistrationResult,
-    OpaqueFinishServerLoginParams, OpaqueFinishServerLoginResult, OpaqueStartClientLoginParams,
-    OpaqueStartClientLoginResult, OpaqueStartClientRegistrationParams,
-    OpaqueStartClientRegistrationResult, OpaqueStartServerLoginParams,
-    OpaqueStartServerLoginResult,
+    OpaqueFinishServerLoginParams, OpaqueFinishServerLoginResult,
+    OpaqueFinishServerRegistrationParams, OpaqueFinishServerRegistrationResult,
+    OpaqueStartClientLoginParams, OpaqueStartClientLoginResult,
+    OpaqueStartClientRegistrationParams, OpaqueStartClientRegistrationResult,
+    OpaqueStartServerLoginParams, OpaqueStartServerLoginResult,
 };
 
 fn opaque_create_server_setup() -> Vec<u8> {
@@ -351,6 +364,19 @@ fn opaque_create_server_registration_response(
     let registration_response_bytes = server_registration_start_result.message.serialize();
     Ok(OpaqueCreateServerRegistrationResponseResult {
         registration_response: registration_response_bytes.to_vec(),
+    })
+}
+
+fn opaque_finish_server_registration(
+    params: OpaqueFinishServerRegistrationParams,
+) -> Result<OpaqueFinishServerRegistrationResult, Error> {
+    let upload = RegistrationUpload::<DefaultCipherSuite>::deserialize(&params.message_bytes)
+        .map_err(from_protocol_error("finish serverRegistration"))?;
+
+    let password_file = ServerRegistration::finish(upload);
+
+    Ok(OpaqueFinishServerRegistrationResult {
+        password_file: password_file.serialize().to_vec(),
     })
 }
 
